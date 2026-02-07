@@ -6,4 +6,5 @@ build/
 .eggs/
 *.h5ad
 *.csv
+notebooks/*.png
 data/
