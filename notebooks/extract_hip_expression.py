@@ -178,7 +178,7 @@ ax.set_xlim(-0.5,ng-0.5); ax.set_ylim(-0.5,nc-0.5)
 for s,e,gname in gs: ax.annotate(gname, xy=((s+e)/2,1.01), xycoords=('data','axes fraction'), ha='center', va='bottom', fontsize=10, fontweight='bold')
 for j in range(ng+1): ax.axvline(j-0.5, color='gray', lw=0.3, alpha=0.3, zorder=1)
 for i in range(nc+1): ax.axhline(i-0.5, color='gray', lw=0.3, alpha=0.3, zorder=1)
-ax.set_title('Scube1 & markers — Cortical subplate (HPF dissection)\n(hippocampal formation)', fontsize=13, pad=30)
+ax.set_title('Scube1 & markers — Hippocampal formation (HIP dissection))', fontsize=13, pad=30)
 h = [Line2D([0],[0],marker='o',color='w',ls='None',ms=np.sqrt(mi+(ms-mi)*f)/1.7,mfc='black',mec='black',mew=0.5,label=f'{f}') for f in [0.2,0.4,0.6,0.8,1.0]]
 leg = ax.legend(handles=h, title='Fraction of cell\nwith >0 read', loc='upper left', bbox_to_anchor=(1.02,1), frameon=True, fontsize=8, title_fontsize=9, handletextpad=0.5, labelspacing=1.2)
 ax.add_artist(leg)
