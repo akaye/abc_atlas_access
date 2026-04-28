@@ -151,6 +151,8 @@ def main():
         groupby='subclass_short',
         cmap='Reds',
         figsize=(fig_w, fig_h),
+        dot_min=0.25,
+        dot_max=0.75,
         colorbar_title='Mean\nlog2(CPM+1)',
         size_title='% expressing',
         show=False,
