@@ -4,6 +4,10 @@ Regenerate the mPFC NE/5-HT/DA receptor dot plot, simplified to:
   - 5 cortical subclasses: L2/3 IT, L5 IT, L5 PT (= L5 ET), Pvalb, Sst
   - 5-HT2A and 5-HT2C plus all Gs-coupled and Gi-coupled monoamine receptors
 
+Plots raw log2(CPM+1) expression (the WMB-10X "log2" matrices already store
+log2 CPM+1), drops receptors that are essentially silent across all 5
+subclasses (max fraction expressing < 5%), and uses 3x-larger fonts.
+
 Loads from existing pre-extracted CSVs (mpfc_receptor_expression.csv +
 mpfc_10x_metadata.csv) so no data needs to be re-downloaded.
 """
@@ -11,6 +15,7 @@ import re
 from pathlib import Path
 
 import anndata
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import pandas as pd
 import scanpy as sc
@@ -44,6 +49,11 @@ GENE_GROUPS = {
     'DA Gi':   ['Drd2', 'Drd3', 'Drd4'],
 }
 
+# Drop receptors expressed in fewer than this fraction of cells in EVERY
+# selected subclass (i.e. essentially absent from this circuit).
+MIN_MAX_FRAC = 0.05
+FONT_SCALE = 3.0
+
 
 def main():
     print(f'Loading {EXPR_CSV.name} ...')
@@ -74,6 +84,25 @@ def main():
         grp: [g for g in genes if g in available]
         for grp, genes in GENE_GROUPS.items()
     }
+
+    # Drop receptors that are essentially absent (max fraction expressing
+    # across the 5 subclasses < MIN_MAX_FRAC).
+    expr_with_sc = expr_sel.copy()
+    expr_with_sc['_sc'] = meta_sel['subclass_short'].values
+    frac = expr_with_sc.groupby('_sc', observed=True).apply(
+        lambda x: (x.drop(columns='_sc') > 0).mean()
+    )
+    max_frac = frac.max(axis=0)
+    dropped = sorted(g for g, v in max_frac.items() if v < MIN_MAX_FRAC)
+    if dropped:
+        print(f'\nDropped (max fraction expressing < {MIN_MAX_FRAC:.0%}):')
+        for g in dropped:
+            print(f'  {g}: {max_frac[g]:.3f}')
+
+    gene_groups = {
+        grp: [g for g in genes if g not in dropped]
+        for grp, genes in gene_groups.items()
+    }
     gene_groups = {k: v for k, v in gene_groups.items() if v}
     flat_genes = [g for genes in gene_groups.values() for g in genes]
     print(f'\nReceptors plotted ({len(flat_genes)}):')
@@ -94,21 +123,43 @@ def main():
         ordered=True,
     )
 
-    n_sc = len(TARGET_SUBCLASSES)
-    fig_w = max(8, 0.55 * len(flat_genes) + 3)
-    fig_h = max(3.5, 0.55 * n_sc + 2)
+    # Bump every font 3x via matplotlib rcParams (default font.size = 10).
+    base = 10.0
+    new_size = base * FONT_SCALE
+    mpl.rcParams.update({
+        'font.size': new_size,
+        'axes.titlesize': new_size,
+        'axes.labelsize': new_size,
+        'xtick.labelsize': new_size,
+        'ytick.labelsize': new_size,
+        'legend.fontsize': new_size,
+        'legend.title_fontsize': new_size,
+    })
 
+    n_sc = len(TARGET_SUBCLASSES)
+    # Scale figure modestly so the larger fonts have room to breathe but
+    # don't dwarf the dots; scale `largest_dot` to keep dots visually
+    # proportional to the bigger labels.
+    fig_w = (0.85 * len(flat_genes) + 6) * 1.4
+    fig_h = (0.85 * n_sc + 3) * 1.4
+
+    # No standard_scale: plot raw log2(CPM+1) so absolute expression is
+    # comparable across genes and subclasses.
     dp = sc.pl.dotplot(
         adata,
         var_names=gene_groups,
         groupby='subclass_short',
-        standard_scale='var',
         cmap='Reds',
         figsize=(fig_w, fig_h),
+        colorbar_title='Mean\nlog2(CPM+1)',
+        size_title='% expressing',
         show=False,
         return_fig=True,
     )
-    dp.style(dot_edge_color='black', dot_edge_lw=0.5)
+    dp.style(dot_edge_color='black', dot_edge_lw=0.5,
+             largest_dot=200 * (FONT_SCALE ** 1.5))
+    # Give the legends room to breathe at 3x font size.
+    dp.legends_width = 2.5 * FONT_SCALE
 
     out = OUTPUT_DIR / 'dotplot_mPFC_receptors_simplified.png'
     dp.savefig(out, dpi=150, bbox_inches='tight')
