@@ -97,7 +97,10 @@ def main():
     fig = plt.figure(figsize=(0.95 * n_cols + 5.5, 0.55 * n_rows + 2.5))
     ax = fig.add_axes([0.10, 0.12, 0.55, 0.78])
 
-    cmap = plt.get_cmap('viridis')
+    cmap = LinearSegmentedColormap.from_list(
+        'greens',
+        ['#f7fcf5', '#c7e9c0', '#74c476', '#238b45', '#00441b'],
+    )
     norm = Normalize(vmin=0, vmax=VMAX)
 
     SIZE_MIN_PCT = MIN_FRAC_DISPLAY * 100
