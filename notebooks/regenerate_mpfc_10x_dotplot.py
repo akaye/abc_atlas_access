@@ -159,13 +159,14 @@ def main():
         dot_min=0.25,
         dot_max=0.75,
         colorbar_title='Mean\nlog2(CPM+1)',
-        size_title='% expressing',
+        size_title='% expressing\n\n',
         show=False,
         return_fig=True,
     )
     dp.style(dot_edge_color='black', dot_edge_lw=0.5,
-             largest_dot=200 * (FONT_SCALE ** 1.5))
-    dp.legends_width = 2.5 * FONT_SCALE
+             largest_dot=120 * (FONT_SCALE ** 1.5))
+    dp.legends_width = 4.0 * FONT_SCALE
+
 
     out = OUTPUT_DIR / 'dotplot_mPFC_10x_receptors.png'
     dp.savefig(out, dpi=150, bbox_inches='tight')
