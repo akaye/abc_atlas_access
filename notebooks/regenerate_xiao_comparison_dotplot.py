@@ -157,7 +157,7 @@ def main():
         size_ax.text(0.55, y, f'{pct}', va='center', fontsize=8)
 
     # Color bar (right column, bottom half)
-    cbar_ax = fig.add_axes([0.88, 0.15, 0.025, 0.55])
+    cbar_ax = fig.add_axes([0.88, 0.50, 0.025, 0.40])
     sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
     cbar = fig.colorbar(sm, cax=cbar_ax)
     cbar.set_label('Gene expression\nlog$_2$(CPM + 1)', fontsize=9)
