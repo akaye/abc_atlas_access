@@ -122,8 +122,7 @@ def main():
     )
     ax.set_xlim(-0.6, n_cols - 0.4)
     ax.set_ylim(-0.7, n_rows - 0.3)
-    ax.set_title('BLA (CTXsp dissection; LA/BLA/BMA/PA + interneurons)',
-                 fontsize=11)
+    ax.set_title('BLA', fontsize=11)
     for spine in ('top', 'right'):
         ax.spines[spine].set_visible(False)
     ax.tick_params(length=0)
